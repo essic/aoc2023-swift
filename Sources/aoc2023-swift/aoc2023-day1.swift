@@ -4,8 +4,8 @@
 import Algorithms
 import Foundation
 
-func day1() throws -> Int {
-    let data = try String(contentsOfFile: "day1-input.txt")
+func day1(_ data: String) -> Int {
+    
     let fromWordToDigitStr = [
         "one": "1", "two": "2", "three": "3", "four": "4", "five": "5", "six": "6", "seven": "7",
         "eight": "8", "nine": "9",
@@ -59,4 +59,4 @@ func day1() throws -> Int {
     return total
 }
 
-print(try day1())
+
