@@ -15,187 +15,126 @@ extension String {
     }
 }
 
-/// A description
-enum Cubes {
-    case red(Int)
-    case green(Int)
-    case blue(Int)
-
-    static func mk(value num: Int, color data: String) -> Cubes {
-        switch data {
-        case "red":
-            return Cubes.red(num)
-        case "green":
-            return Cubes.green(num)
-        case "blue":
-            return Cubes.blue(num)
-        default:
-            fatalError("This should not be hapening !")
-        }
-    }
-
-    func getValue() -> Int {
-        switch self {
-            case .red(let v) : return v
-            case .blue(let v) : return v
-            case .green(let v ): return v
-        }
-    }
-
-}
-
-extension [Cubes] {
-    func getRed() -> Cubes {
-        let val = self.map {
-            if case .red(let num) = $0 {
-                return num
-            } else {
-                return 0
-            }
-        }.reduce(0) {
-            $0 + $1
-        }
-        return .red(val)
-    }
-    func getGreen() -> Cubes {
-        let val = self.map {
-            if case .green(let num) = $0 {
-                return num
-            } else {
-                return 0
-            }
-        }.reduce(0) {
-            $0 + $1
-        }
-        return .green(val)
-    }
-    func getBlue() -> Cubes {
-        let val = self.map {
-            if case .blue(let num) = $0 {
-                return num
-            } else {
-                return 0
-            }
-        }.reduce(0) {
-            $0 + $1
-        }
-        return .blue(val)
-    }
-}
-
-extension Cubes: Comparable {
-    func hasMoreThan0() -> Bool {
-        switch self {
-        case .red(0): false
-        case .blue(0): false
-        case .green(0): false
-        default: true
-        }
-    }
+enum Color: String {
+    case red
+    case green
+    case blue
 }
 
 struct GameSet {
-    var content: [Cubes]
-    static private let separator = ","
 
-    init(_ cubes: Cubes...) {
-        content = cubes
+    let cubes: [Color: Int]
+    private static let GameSetCubeEntriesSeparator = ","
+
+    init(cubes c: [(Color, Int)]) {
+        var tmp = [Color: Int]()
+        let cubesByGroup =
+            c.grouped { (Color, Int) in
+                Color
+            }
+        for (key, value) in cubesByGroup {
+            let total = value.map { $0.1 }.reduce(0) { $0 + $1 }
+            tmp[key] = total
+        }
+        cubes = tmp
     }
 
     init(_ data: String) {
-        content = []
-        for rawCube in data.cleanSplit(separator: GameSet.separator) {
-            let num = Int(
-                rawCube.filter {
-                    $0.isNumber
-                })!
+        let entries =
+            data.cleanSplit(separator: GameSet.GameSetCubeEntriesSeparator)
+            .map { rawCube in
 
-            let value = rawCube.filter {
-                $0.isLetter
+                let num = Int(
+                    rawCube.filter {
+                        $0.isNumber
+                    })!
+
+                let value = rawCube.filter {
+                    $0.isLetter
+                }
+                let color = Color(rawValue: value)!  //Better ?
+                return (color, num)
             }
-            content.append(Cubes.mk(value: num, color: value))
+
+        self.init(cubes: entries)
+    }
+
+    private func isValid(given: GameBag) -> Bool? {
+        var result = Optional.some(true) // I know it's ugly...
+        for (color, count) in cubes {
+            result = given.cubes[color].map { $0 >= count && result! }
         }
+        return result
+    }
+
+    func isPossible(given b: GameBag) -> Bool {
+        return isValid(given: b) ?? false
     }
 
     func getPower() -> Int {
-        content.map { $0.getValue()}.reduce(1) {
-            $0 * $1
-        }
-    }
-
-    func isPossible(bag b: [Cubes]) -> Bool {
-
-        let redFromBag = b.getRed()
-        let redFromSet = content.getRed()
-        let blueFromBag = b.getBlue()
-        let blueFromSet = content.getBlue()
-        let greenFromBag = b.getGreen()
-        let greenFromSet = content.getGreen()
-        return redFromBag >= redFromSet
-            && greenFromBag >= greenFromSet
-            && blueFromBag >= blueFromSet
+        return cubes.values.reduce(1) { $0 * $1 }
     }
 }
 
+struct GameBag {
+    let cubes: [Color: Int]
+}
+
 struct Game {
-    private static let separatorToken = ":"
-    private static let separatorToken2 = ";"
     let id: Int
-    var sets: [GameSet] = []
+    let gameSets: [GameSet]
+    private static let gameIdentifierSeparator = ":"
+    private static let gameSetSeparator = ";"
 
     init(_ data: String) {
-        let gameParts = data.cleanSplit(separator: Game.separatorToken)
+        var tmp = [GameSet]()
+        let gameParts = data.cleanSplit(separator: Self.gameIdentifierSeparator)
         self.id = Int(gameParts.first!.filter { $0.isNumber })!
         let rawSets = gameParts[1]
-        for rawSet in rawSets.cleanSplit(separator: Game.separatorToken2) {
-            sets.append(GameSet(String(rawSet)))
+        for rawSet in rawSets.cleanSplit(separator: Self.gameSetSeparator) {
+            tmp.append(GameSet(rawSet))
         }
+        gameSets = tmp
     }
 
-    func isPossible(bag b: [Cubes]) -> Bool {
-        sets.map {
-            $0.isPossible(bag: b)
+    func isPossible(bag b: GameBag) -> Bool {
+        gameSets.map {
+            $0.isPossible(given: b)
         }.reduce(true) {
             $0 && $1
         }
     }
 
-    func idealSet() -> GameSet {
-        let idealRed =
-            sets.map{ $0.content.getRed()}.max()!
-
-        let idealGreen =
-            sets.map { $0.content.getGreen()}.max()!
-        
-        let ideadBlue =
-            sets.map { $0.content.getBlue()}.max()!
-
-        return GameSet(ideadBlue, idealGreen, idealRed)
+    func idealSetPower(colours c: Set<Color>) -> Int {
+        var result = 1
+        for color in c {
+            let e = gameSets.map { $0.cubes[color] ?? 0 }.max() ?? 1
+            result = result * e
+        }
+        return result
     }
+
 }
 
 func day2Part1(_ data: String) -> Int {
-    let bag: [Cubes] = [.red(12), .green(13), .blue(14)]
-    var games: [Game] = []
-    data.enumerateLines { line, stop in
-        games.append(Game(line))
-    }
-    let possibleGames =
-        games.filter {
-            $0.isPossible(bag: bag)
+    var result = 0
+    let bag = GameBag(cubes: [Color.red: 12, Color.green: 13, Color.blue: 14])
+    data.enumerateLines { line, _ in
+        let g = Game(line)
+        if g.isPossible(bag: bag) {
+            result += g.id
         }
-
-    return possibleGames.map { $0.id }.reduce(0) { $0 + $1 }
+    }
+    return result
 }
 
 func day2Part2(_ data: String) -> Int {
-    var games: [Game] = []
-    data.enumerateLines { line, stop in
-        games.append(Game(line))
+    var result = 0
+    let onColors: Set<Color> = [Color.red, Color.green, Color.blue]
+    data.enumerateLines { line, _ in
+        result += Game(line).idealSetPower(colours: onColors)
     }
-    let result = games.map { $0.idealSet() }.map{ $0.getPower()}.reduce(0) {
-        $0 + $1
-    }
+
     return result
 }
 
