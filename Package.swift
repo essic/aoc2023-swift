@@ -5,9 +5,14 @@ import PackageDescription
 
 let package = Package(
     name: "aoc2023-swift",
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-algorithms.git", branch: "main")
+    platforms: [
+        .macOS(SupportedPlatform.MacOSVersion.v14)
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-algorithms.git", branch: "main"),
+        // .package(url: "https://github.com/swiftlang/swift-testing.git", branch: "main"),
+    ],
+
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
@@ -19,7 +24,9 @@ let package = Package(
             path: "Sources"),
         .testTarget(
             name: "aoc2023-test",
-            dependencies: ["aoc2023"],
-            path: "Tests"),
+            dependencies: [
+                "aoc2023",
+                // .product(name: "Testing", package: "swift-testing")
+             ]),
     ]
 )

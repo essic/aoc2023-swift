@@ -9,7 +9,7 @@ guard let input = readLine(), let day = Int(input), day <= 31 && day >= 1 else {
 }
 
 let inputFile = "day\(day)-input.txt"
-let content = try String(contentsOfFile: inputFile)
+let content = try String(contentsOfFile: inputFile, encoding: .utf8)
 print("Day \(day) : ", terminator: "")
 
 switch day {
