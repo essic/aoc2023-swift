@@ -1,0 +1,51 @@
+[[language]]
+name = "swift"
+scope = "source.swift"
+injection-regex = "swift"
+file-types = ["swift", "swiftinterface"]
+roots = [ "Package.swift" ]
+comment-token = "//"
+block-comment-tokens = { start = "/*", end = "*/" }
+formatter = { command = "swift-format", args = [ "--configuration", ".swift-format"] }
+auto-format = true
+language-servers = [ "sourcekit-lsp" ]
+
+[[grammar]]
+name = "swift"
+source = { git = "https://github.com/alex-pinkus/tree-sitter-swift", rev = "57c1c6d6ffa1c44b330182d41717e6fe37430704" }
+
+[language.debugger]
+name = "lldb-dap"
+transport = "stdio"
+command = "lldb-dap"
+
+[[language.debugger.templates]]
+name = "test"
+request = "launch"
+completion = [ { name = "binary", default=".build/debug/aoc2023-swiftPackageTests.xctest" } ]
+args = { program = "{0}", args=["--testing-library","swift-testing","--no-parallel"] }
+
+[[language.debugger.templates]]
+name = "binary"
+request = "launch"
+completion = [ { name = "binary", completion = "filename" } ]
+args = { program = "{0}" }
+
+[[language.debugger.templates]]
+name = "binary (terminal)"
+request = "launch"
+completion = [ { name = "binary", completion = "filename" } ]
+args = { program = "{0}", runInTerminal = true }
+
+[[language.debugger.templates]]
+name = "attach"
+request = "attach"
+completion = [ "pid" ]
+args = { pid = "{0}" }
+
+[[language.debugger.templates]]
+name = "gdbserver attach"
+request = "attach"
+completion = [ { name = "lldb connect url", default = "connect://localhost:3333" }, { name = "file", completion = "filename" }, "pid" ]
+args = { attachCommands = [ "platform select remote-gdb-server", "platform connect {0}", "file {1}", "attach {2}" ] }
+
