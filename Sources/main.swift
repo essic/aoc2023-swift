@@ -17,6 +17,8 @@ case 1:
   print(day1(content))
 case 2:
   print(day2(content))
+case 3:
+  print(day3(content))
 default:
   print("Not YET IMPLEMENTED")
 }
