@@ -143,17 +143,7 @@ func lookup(_ lines: [String], query q: Query) -> [Int] {
 }
 
 func lookupPart2(_ lines: [String], query q: Query) -> [Int] {
-  var results = lookupOnTheSides(lines[q.from.row], from: q)
-
-  if q.towards.contains(.up) {
-    let upResults = lookupOnTheSides(lines[q.from.row - 1], from: q)
-    results.append(contentsOf: upResults)
-  }
-  if q.towards.contains(.down) {
-    let downResults = lookupOnTheSides(lines[q.from.row + 1], from: q)
-    results.append(contentsOf: downResults)
-  }
-
+  let results = lookup(lines, query: q)
   guard results.count == 2 else {
     return []
   }
