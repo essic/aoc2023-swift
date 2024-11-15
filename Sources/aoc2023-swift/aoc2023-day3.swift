@@ -1,21 +1,29 @@
-enum Direction {
+private
+  enum Direction
+{
   case up
   case down
   case left
   case right
 }
 
-struct SchematicCell {
+private
+  struct SchematicCell
+{
   let row: Int
   let column: Int
 }
 
-struct Query {
+private
+  struct Query
+{
   let from: SchematicCell
   let towards: Set<Direction>
 }
 
-func findAllOccurences2(on str: String) -> [Int] {
+private
+  func findAllOccurences2(on str: String) -> [Int]
+{
   let dot = Character(".")
   var startSearchFrom = str.startIndex
   var occurencePositions = [Int]()
@@ -29,9 +37,10 @@ func findAllOccurences2(on str: String) -> [Int] {
   return occurencePositions
 }
 
-func getSearchDirection(
-  on str: String, atRow r: Int, lastRow lr: Int
-)
+private
+  func getSearchDirection(
+    on str: String, atRow r: Int, lastRow lr: Int
+  )
   -> [Query]
 {
 
@@ -68,12 +77,14 @@ func getSearchDirection(
 }
 
 extension Character {
-  static func toInt(_ src: [Character]...) -> Int? {
+  fileprivate static func toInt(_ src: [Character]...) -> Int? {
     return Int(String(src.flatMap { $0 }))
   }
 }
 
-func lookupOnTheSides(_ line: String, from q: Query) -> [Int] {
+private
+  func lookupOnTheSides(_ line: String, from q: Query) -> [Int]
+{
   var digitsOnTheLeft = [Character]()
   var digitsOnTheRight = [Character]()
   let startIndex = line.index(line.startIndex, offsetBy: (q.from.column))
@@ -128,7 +139,9 @@ func lookupOnTheSides(_ line: String, from q: Query) -> [Int] {
   return numbers
 }
 
-func lookup(_ lines: [String], query q: Query) -> [Int] {
+private
+  func lookup(_ lines: [String], query q: Query) -> [Int]
+{
   var results = lookupOnTheSides(lines[q.from.row], from: q)
 
   if q.towards.contains(.up) {
@@ -142,7 +155,9 @@ func lookup(_ lines: [String], query q: Query) -> [Int] {
   return results
 }
 
-func lookupPart2(_ lines: [String], query q: Query) -> [Int] {
+private
+  func lookupPart2(_ lines: [String], query q: Query) -> [Int]
+{
   let results = lookup(lines, query: q)
   guard results.count == 2 else {
     return []

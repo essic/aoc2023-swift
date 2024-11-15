@@ -15,13 +15,17 @@ extension String {
   }
 }
 
-enum Color: String {
+private
+  enum Color: String
+{
   case red
   case green
   case blue
 }
 
-struct GameSet {
+private
+  struct GameSet
+{
 
   let cubes: [Color: Int]
   private static let GameSetCubeEntriesSeparator = ","
@@ -76,11 +80,15 @@ struct GameSet {
   }
 }
 
-struct GameBag {
+private
+  struct GameBag
+{
   let cubes: [Color: Int]
 }
 
-struct Game {
+private
+  struct Game
+{
   let id: Int
   let gameSets: [GameSet]
   private static let gameIdentifierSeparator = ":"

@@ -4,9 +4,11 @@
 import Algorithms
 import Foundation
 
-func findAllOccurences(on str: String, of target: String) -> (
-  occurence: String, positions: [Int]
-) {
+private
+  func findAllOccurences(on str: String, of target: String) -> (
+    occurence: String, positions: [Int]
+  )
+{
   var startSearchFrom = str.startIndex
   var occurencePositions = [Int]()
   while startSearchFrom < str.endIndex {
