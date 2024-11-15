@@ -12,7 +12,8 @@ language-servers = [ "sourcekit-lsp" ]
 
 [[grammar]]
 name = "swift"
-source = { git = "https://github.com/alex-pinkus/tree-sitter-swift", rev = "57c1c6d6ffa1c44b330182d41717e6fe37430704" }
+# source = { git = "https://github.com/alex-pinkus/tree-sitter-swift", rev = "57c1c6d6ffa1c44b330182d41717e6fe37430704" }
+source = { git = "https://github.com/alex-pinkus/tree-sitter-swift", rev = "main" }
 
 [language.debugger]
 name = "lldb-dap"
@@ -34,7 +35,7 @@ args = { program = "{0}" }
 [[language.debugger.templates]]
 name = "binary (terminal)"
 request = "launch"
-completion = [ { name = "binary", default=".build/debug/aoc2023" } ]
+completion = [ { name = "binary", completion = "filename", default=".build/debug/aoc2023" } ]
 args = { program = "{0}", runInTerminal = true }
 
 [[language.debugger.templates]]
