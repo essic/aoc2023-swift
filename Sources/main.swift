@@ -2,25 +2,45 @@
 // https://docs.swift.org/swift-book
 import Foundation
 
-print("Which day ? : ", terminator: "")
-guard let input = readLine(), let day = Int(input), day <= 31 && day >= 1 else {
-  print("Input invalid !")
-  exit(1)
+var again = CommandLine.arguments[1...].first.map { $0 == "-r" } ?? false
+let days: [Int: (((String) -> Int), ((String) -> Int))] =
+  [
+    2: (day2Part1, day2Part2),
+    3: (day3Part1, day3Part2),
+    4: (day4Part1, day4Part2),
+  ]
+
+@MainActor
+func aocRun(for d: Int) {
+  let inputFile = "day\(d)-input.txt"
+  do {
+    let data = try String(contentsOfFile: inputFile, encoding: .utf8)
+    if d == 1 {
+      print("Day \(d) -> \(day1(data))")
+    } else {
+      guard let (part1, part2) = days[d] else {
+        print("Not yet implemented !")
+        return
+      }
+      print("Day \(d) -> Part 1: \(part1(data)) | Part 2: \(part2(data))")
+    }
+  } catch {
+    print("Error while loading  \(inputFile). Does it exists ?")
+    return
+  }
 }
 
-let inputFile = "day\(day)-input.txt"
-let content = try String(contentsOfFile: inputFile, encoding: .utf8)
-print("Day \(day) : ", terminator: "")
+repeat {
+  print("Which day ? (or 'q' to quit) : ", terminator: "")
+  let input = readLine()
+  guard let day = Int(input!), day <= 31 && day >= 1 else {
+    if input == "q" {
+      again = false
+    } else {
+      print("Input \(input ?? "N/A") is invalid !")
+    }
+    continue
+  }
+  aocRun(for: day)
 
-switch day {
-case 1:
-  print(day1(content))
-case 2:
-  print(day2(content))
-case 3:
-  print(day3(content))
-case 4:
-  print(day4(content))
-default:
-  print("Not YET IMPLEMENTED")
-}
+} while again
