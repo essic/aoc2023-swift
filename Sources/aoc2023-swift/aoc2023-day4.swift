@@ -7,25 +7,13 @@ private struct Card {
     return winningNumbers.filter { gamerNumbers.contains($0) }.count
   }
 
-  //TODO: Find the right algorithm !
   func computeWorth() -> Int {
-    var worth = 0
-    for w in winningNumbers {
-      let toto = gamerNumbers.filter {
-        $0 == w
-      }
-
-      worth = toto.reduce(worth) { x, _ in
-        if x == 0 {
-          return 1
-        } else {
-          return x * 2
-        }
-      }
+    let a = Set(winningNumbers)
+    let b = Set(gamerNumbers)
+    return a.intersection(b).reduce(0) { worth, _ in
+      return worth == 0 ? 1 : worth * 2
     }
-    return worth
   }
-
 }
 
 private func getCard(_ rawScratchCard: String) -> Card {
@@ -42,17 +30,10 @@ private func getCard(_ rawScratchCard: String) -> Card {
 }
 
 func day4Part1(_ content: String) -> Int {
-
-  var totalWorth = 0
-  let lines = content.components(separatedBy: "\n")
-  for line in lines {
-    if line.isEmpty {
-      continue
-    }
-    let card = getCard(line)
-    totalWorth += card.computeWorth()
-  }
-  return totalWorth
+  let cards = content.components(separatedBy: "\n").filter {
+    $0.trimmingCharacters(in: .whitespacesAndNewlines).count > 0
+  }.map { getCard($0) }
+  return cards.reduce(0) { $0 + $1.computeWorth() }
 }
 
 func day4Part2(_ content: String) -> Int {
@@ -60,29 +41,17 @@ func day4Part2(_ content: String) -> Int {
     $0.trimmingCharacters(in: .whitespacesAndNewlines).count > 0
   }.map { getCard($0) }
 
-  var originals = [Int: [Int]]()
-  var copies = [Int]()
-  var winners = [Int]()
+  var copies = [Int: Int](uniqueKeysWithValues: cards.map { ($0.id, 0) })
   for (index, card) in cards.enumerated() {
-    let nextIndex = index + 1
     let nb = card.getNbOfMatches()
+    let nextIndex = index + 1
     let toIndex = nextIndex + nb
     let remainder = cards[nextIndex..<toIndex]
-    let copiesForCard = remainder.map { $0.id }
-    originals[card.id] = copiesForCard
-    copies.append(contentsOf: copiesForCard)
-    let nbInstance = copies.count { $0 == card.id }
-    for _ in 0..<nbInstance {
-      copies.append(contentsOf: copiesForCard)
+    for c in (remainder.map { $0.id }) {
+      copies[c] = copies[c]! + copies[card.id]! + 1
     }
-
   }
-  winners.append(contentsOf: copies)
-  winners.append(contentsOf: originals.keys)
-
-  let toto = winners.grouped { $0 }.map { $0.value.count }
-
-  return toto.reduce(0) { $0 + $1 }
+  return copies.values.reduce(0) { $0 + $1 } + cards.count
 }
 
 func day4(_ data: String) -> (Int, Int) {
