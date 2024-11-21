@@ -197,7 +197,3 @@ func day3Part2(_ data: String) -> Int {
 
   return result
 }
-
-func day3(_ data: String) -> (part1: Int, part2: Int) {
-  return (day3Part1(data), day3Part2(data))
-}

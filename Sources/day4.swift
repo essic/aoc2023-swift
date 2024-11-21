@@ -53,7 +53,3 @@ func day4Part2(_ content: String) -> Int {
   }
   return copies.values.reduce(0) { $0 + $1 } + cards.count
 }
-
-func day4(_ data: String) -> (Int, Int) {
-  return (day4Part1(data), day4Part2(data))
-}
