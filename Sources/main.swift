@@ -8,6 +8,7 @@ let days: [Int: (((String) -> Int), ((String) -> Int))] =
     2: (day2Part1, day2Part2),
     3: (day3Part1, day3Part2),
     4: (day4Part1, day4Part2),
+    5: (day5Part1, day5Part2),
   ]
 
 @MainActor
