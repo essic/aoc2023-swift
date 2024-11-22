@@ -133,43 +133,43 @@ private func parseSeeds(_ content: String) throws -> [Int] {
 }
 
 private func parse2(_ content: String, keyWord k: String, untilTheEnd e: Bool = false) -> Result<
-  [[Int]], AppError
+  [IntervalMapper], AppError
 > {
   parse(content, keyWord: k, untilTheEnd: e) {
     $0.cleanSplit(separator: "\n")
       .map {
         $0.trimmingCharacters(in: .whitespaces)
           .cleanSplit(separator: " ").map { Int($0)! }
-      }
+      }.map(IntervalMapper.init)
   }
 }
 
-private func parseSeedToSoilMap(_ content: String) throws -> [[Int]] {
+private func parseSeedToSoilMap(_ content: String) throws -> [IntervalMapper] {
   return
     try getSuccessOrThrow(parse2(content, keyWord: "seed-to-soil map:\n"))
 }
 
-private func parseSoilToFertilizerMap(_ content: String) throws -> [[Int]] {
+private func parseSoilToFertilizerMap(_ content: String) throws -> [IntervalMapper] {
   try getSuccessOrThrow(parse2(content, keyWord: "soil-to-fertilizer map:\n"))
 }
 
-private func parseFertilizerToWaterMap(_ content: String) throws -> [[Int]] {
+private func parseFertilizerToWaterMap(_ content: String) throws -> [IntervalMapper] {
   try getSuccessOrThrow(parse2(content, keyWord: "fertilizer-to-water map:\n"))
 }
 
-private func parseWaterToLightMap(_ content: String) throws -> [[Int]] {
+private func parseWaterToLightMap(_ content: String) throws -> [IntervalMapper] {
   try getSuccessOrThrow(parse2(content, keyWord: "water-to-light map:\n"))
 }
 
-private func parseLightToTemperatureMap(_ content: String) throws -> [[Int]] {
+private func parseLightToTemperatureMap(_ content: String) throws -> [IntervalMapper] {
   try getSuccessOrThrow(parse2(content, keyWord: "light-to-temperature map:\n"))
 }
 
-private func parseTemperatureToHumidityMap(_ content: String) throws -> [[Int]] {
+private func parseTemperatureToHumidityMap(_ content: String) throws -> [IntervalMapper] {
   try getSuccessOrThrow(parse2(content, keyWord: "temperature-to-humidity map:\n"))
 }
 
-private func parseHumidityToLocationMap(_ content: String) throws -> [[Int]] {
+private func parseHumidityToLocationMap(_ content: String) throws -> [IntervalMapper] {
   return try getSuccessOrThrow(
     parse2(content, keyWord: "humidity-to-location map:\n", untilTheEnd: true))
 }
@@ -250,41 +250,19 @@ func |> <ValueSource, ValueDestination>(
 }
 
 private struct Almanac {
-  private let seeds: [Int]
-  private let seedToSoilMap: [IntervalMapper]
-  private let soilToFertilizerMap: [IntervalMapper]
-  private let fertilizerToWaterMap: [IntervalMapper]
-  private let waterToLightMap: [IntervalMapper]
-  private let lightToTemperatureMap: [IntervalMapper]
-  private let temperatureToHumidityMap: [IntervalMapper]
-  private let humidityToLocationMap: [IntervalMapper]
-
-  init(
-    seeds a: [Int],
-    fromSeedToSoil b: [[Int]],
-    fromSoilToFertilizer c: [[Int]],
-    fromFertilizerToWater d: [[Int]],
-    fromWaterToLight e: [[Int]],
-    fromLightToTemperature f: [[Int]],
-    fromTemperatureToHumidity g: [[Int]],
-    fromHumidityToLocation h: [[Int]]
-  ) {
-    seeds = a
-    seedToSoilMap = b.map { IntervalMapper(data: $0) }
-    soilToFertilizerMap = c.map { IntervalMapper(data: $0) }
-    fertilizerToWaterMap = d.map { IntervalMapper(data: $0) }
-    waterToLightMap = e.map { IntervalMapper(data: $0) }
-    lightToTemperatureMap = f.map { IntervalMapper(data: $0) }
-    temperatureToHumidityMap = g.map { IntervalMapper(data: $0) }
-    humidityToLocationMap = h.map { IntervalMapper(data: $0) }
-  }
+  let seeds: [Int]
+  let seedToSoilMap: [IntervalMapper]
+  let soilToFertilizerMap: [IntervalMapper]
+  let fertilizerToWaterMap: [IntervalMapper]
+  let waterToLightMap: [IntervalMapper]
+  let lightToTemperatureMap: [IntervalMapper]
+  let temperatureToHumidityMap: [IntervalMapper]
+  let humidityToLocationMap: [IntervalMapper]
 
   func computePart1() -> Int? {
-    return
-      seeds
+    seeds
       .map {
-        return
-          $0
+        $0
           |> seedToSoilMap.computePart1
           |> soilToFertilizerMap.computePart1
           |> fertilizerToWaterMap.computePart1
@@ -316,21 +294,21 @@ private struct Almanac {
   }
 }
 
-private func produceAlmanac(_ data: String) throws -> Almanac {
+private func parseAlmanac(_ data: String) throws -> Almanac {
   Almanac(
     seeds: try parseSeeds(data),
-    fromSeedToSoil: try parseSeedToSoilMap(data),
-    fromSoilToFertilizer: try parseSoilToFertilizerMap(data),
-    fromFertilizerToWater: try parseFertilizerToWaterMap(data),
-    fromWaterToLight: try parseWaterToLightMap(data),
-    fromLightToTemperature: try parseLightToTemperatureMap(data),
-    fromTemperatureToHumidity: try parseTemperatureToHumidityMap(data),
-    fromHumidityToLocation: try parseHumidityToLocationMap(data))
+    seedToSoilMap: try parseSeedToSoilMap(data),
+    soilToFertilizerMap: try parseSoilToFertilizerMap(data),
+    fertilizerToWaterMap: try parseFertilizerToWaterMap(data),
+    waterToLightMap: try parseWaterToLightMap(data),
+    lightToTemperatureMap: try parseLightToTemperatureMap(data),
+    temperatureToHumidityMap: try parseTemperatureToHumidityMap(data),
+    humidityToLocationMap: try parseHumidityToLocationMap(data))
 }
 
 func day5Part1(_ data: String) -> Int {
   do {
-    let almanac2 = try produceAlmanac(data)
+    let almanac2 = try parseAlmanac(data)
     let result = almanac2.computePart1()
     return result!
   } catch {
@@ -341,7 +319,7 @@ func day5Part1(_ data: String) -> Int {
 
 func day5Part2(_ data: String) -> Int {
   do {
-    let almanac2 = try produceAlmanac(data)
+    let almanac2 = try parseAlmanac(data)
     let result = almanac2.computePart2()
     return result!
   } catch {
